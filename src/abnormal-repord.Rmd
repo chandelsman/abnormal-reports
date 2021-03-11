@@ -1,0 +1,85 @@
+---
+title: ''
+output: 
+  html_document
+params:
+  dt_start:
+    label: "Start Date"
+    input: date
+    value: !r Sys.Date()-30
+    max: !r Sys.Date()
+  dt_end: 
+    label: "End Date"
+    input: date
+    value: !r Sys.Date()
+    max: !r Sys.Date()
+  client:
+    label: "Client Name"
+    input: select
+    value: Cherry Hills Midwifery, Obstetrics, & Gynecology
+    choices: 
+    - Cherry Hills Midwifery, Obstetrics, & Gynecology
+    - other
+editor_options: 
+  chunk_output_type: console
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+
+# load libraries
+library(tidyverse)
+library(lubridate)
+library(here)
+library(gt)
+```
+
+<!-- Set header, client, and reporting details -->
+<div align="center"> 
+
+![](sp-logo.png){width=25%}
+
+# Abnormal Results Report
+
+## `r params$client`
+
+### Results received from `r params$dt_start` to `r params$dt_end`
+
+```{r import data, message=FALSE}
+abnorm_raw <- readr::read_csv(here("data", "cherry-abnormal.csv"))
+```
+
+```{r clean data, message=FALSE}
+abnorm_clean <- 
+  abnorm_raw %>% 
+  filter(!str_detect(`Accession/Group`, "^C|B")) %>% 
+  select(-c("Client/Status", "Received/Released/Completed")) %>% 
+  mutate(
+    `Accession/Group` = case_when(
+      str_detect(`Accession/Group`, "^1") ~ `Patient/Test`, 
+      TRUE ~ `Accession/Group`
+    ),
+    `Patient/Test` = case_when(
+     !str_detect(`Patient/Test`, "^\\[") ~ "",
+     TRUE ~ `Patient/Test`
+    ),
+    `Accession/Group` = str_replace(`Accession/Group`, "(\\().*(\\))", ""), 
+    `Patient/Test` = str_replace_all(`Patient/Test`, "\\[", ""),
+    `Patient/Test` = str_replace_all(`Patient/Test`, "\\]", ":")
+  ) %>% 
+  rename(`Name & Result ID` = `Accession/Group`,
+         `Test` = `Patient/Test`)
+```
+
+```{r results table, echo=FALSE}
+abnorm_clean %>% 
+  gt() %>% 
+  tab_options(
+    heading.title.font.size = pct(120),
+    heading.subtitle.font.size = pct(120),
+    column_labels.font.weight = "bold", 
+    table.width = pct(75)
+  )
+```
+
+
