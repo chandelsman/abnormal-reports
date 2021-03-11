@@ -53,7 +53,7 @@ abnorm_raw <- readr::read_csv(here("data", "cherry-abnormal.csv"))
 abnorm_clean <- 
   abnorm_raw %>% 
   filter(!str_detect(`Accession/Group`, "^C|B")) %>% 
-  select(-c("Client/Status", "Received/Released/Completed")) %>% 
+  select(-c("Client/Status")) %>% 
   mutate(
     `Accession/Group` = case_when(
       str_detect(`Accession/Group`, "^1") ~ `Patient/Test`, 
@@ -63,12 +63,13 @@ abnorm_clean <-
      !str_detect(`Patient/Test`, "^\\[") ~ "",
      TRUE ~ `Patient/Test`
     ),
-    `Accession/Group` = str_replace(`Accession/Group`, "(\\().*(\\))", ""), 
+    # `Accession/Group` = str_replace(`Accession/Group`, "(\\().*(\\))", ""), 
     `Patient/Test` = str_replace_all(`Patient/Test`, "\\[", ""),
     `Patient/Test` = str_replace_all(`Patient/Test`, "\\]", ":")
   ) %>% 
-  rename(`Name & Result ID` = `Accession/Group`,
-         `Test` = `Patient/Test`)
+  rename(`Name, DOB, & Result ID` = `Accession/Group`,
+         `Test` = `Patient/Test`,
+         Completed = `Received/Released/Completed`)
 ```
 
 ```{r results table, echo=FALSE}
@@ -78,7 +79,7 @@ abnorm_clean %>%
     heading.title.font.size = pct(120),
     heading.subtitle.font.size = pct(120),
     column_labels.font.weight = "bold", 
-    table.width = pct(75)
+    table.width = pct(85)
   )
 ```
 
