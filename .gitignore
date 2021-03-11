@@ -1,5 +1,6 @@
 # Exclude PHI
 /data/
+/output/
 
 # History files
 .Rhistory
