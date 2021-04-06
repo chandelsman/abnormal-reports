@@ -45,7 +45,7 @@ library(gt)
 ### Results received from `r params$dt_start` to `r params$dt_end`
 
 ```{r import data, message=FALSE}
-abnorm_raw <- readr::read_csv(here::here("data", "cherry-abnormal.csv"))
+abnorm_raw <- readr::read_csv(here::here("data", "2021-03-Cherry-Hills.csv"))
 ```
 
 ```{r clean data, message=FALSE}
